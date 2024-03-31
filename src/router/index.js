@@ -61,6 +61,32 @@ export const constantRoutes = [
   },
 
   {
+    path: '/shouye',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Form',
+        component: () => import('@/views/shouye/index'),
+        meta: { title: '首页轮播图', icon: 'person' }
+      }
+    ]
+  },
+
+  {
+    path: '/message',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Message',
+        component: () => import('@/views/message/index'),
+        meta: { title: '消息公告', icon: 'message' }
+      }
+    ]
+  },
+
+  {
     path: '/example',
     component: Layout,
     redirect: '/example/tree',
@@ -91,6 +117,19 @@ export const constantRoutes = [
         name: 'Form',
         component: () => import('@/views/form/index'),
         meta: { title: '人员信息', icon: 'person' }
+      }
+    ]
+  },
+
+  {
+    path: '/invite',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Invite',
+        component: () => import('@/views/invite/index'),
+        meta: { title: '邀请信息', icon: 'person' }
       }
     ]
   },

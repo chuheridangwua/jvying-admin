@@ -156,8 +156,7 @@ export default {
 }
 
 .image-container img {
-    width: 100px;
-    height: 100px;
+    width: 150px;
     object-fit: cover;
     /* 保持图片比例 */
 }
