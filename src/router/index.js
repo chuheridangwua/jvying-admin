@@ -134,6 +134,58 @@ export const constantRoutes = [
     ]
   },
 
+  {
+    path: '/income',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Income',
+        component: () => import('@/views/income/index'),
+        meta: { title: '提现申请', icon: 'person' }
+      }
+    ]
+  },
+
+  {
+    path: '/pay',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Pay',
+        component: () => import('@/views/pay/index'),
+        meta: { title: '结算单', icon: 'person' }
+      }
+    ]
+  },
+
+  {
+    path: '/duizhang',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Duizhang',
+        component: () => import('@/views/duizhang/index'),
+        meta: { title: '对账', icon: 'person' }
+      }
+    ]
+  },
+
+  {
+    path: '/integral',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Integral',
+        component: () => import('@/views/integral/index'),
+        meta: { title: '兑换信息', icon: 'person' }
+      }
+    ]
+  },
+
   // {
   //   path: '/authority',
   //   component: Layout,

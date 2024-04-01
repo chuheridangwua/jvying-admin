@@ -104,8 +104,9 @@
         <div>
           <h3>任务列表详情</h3>
           <el-table :data="userDetails.data.taskListDetails" style="width: 100%">
-            <el-table-column prop="getTime" label="接单任务时间"></el-table-column>
+            <el-table-column prop="getTime" label="报名时间"></el-table-column>
             <el-table-column prop="taskId" label="任务ID"></el-table-column>
+            <el-table-column prop="title" label="任务名称"></el-table-column>
             <el-table-column prop="amountDisbursed" label="已结算金额"></el-table-column>
             <el-table-column prop="amountPending" label="未结算金额"></el-table-column>
           </el-table>
