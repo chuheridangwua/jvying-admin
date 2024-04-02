@@ -12,7 +12,6 @@
 
     <!-- 折线图区域 -->
     <div>
-      <h1 style="align-items: center;text-align: center;margin: 0;">近七日注册人数变化</h1>
       <div ref="registrationChart" style="width: 90vw;height:60vh;margin: 20px auto;"></div>
     </div>
   </div>
@@ -27,24 +26,129 @@ export default {
   name: 'RegistrationStatsPage',
 
   data() {
+    const now = new Date();
+    const todayDate = now.toISOString().split('T')[0];
+    const currentTime = now.toTimeString().split(' ')[0];
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfMonthDate = startOfMonth.toISOString().split('T')[0];
+    const endOfMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
     return {
       cards: [
-        { label: '注册总人数', number: 0 },
-        { label: '今日注册人数', number: 0 },
+        { label: '注册总人数', number: 0, date: '' },
+        { label: '今日注册人数', number: 0, date: `今天：${todayDate}` },
+        { label: '当日打款金额', number: '0', date: `今天：${todayDate}` },
+        { label: '当月打款金额', number: '0', date: `本月：${startOfMonthDate}至${todayDate}` },
+        { label: '当日活跃人数', number: 0, date: `今天：${todayDate}` },
+        { label: '当月活跃人数', number: 0, date: `本月：${startOfMonthDate}至${endOfMonthDate}` },
       ],
       chartData: {
         dates: [],
-        counts: [],
+        activeUsers: [],
+        paymentAmounts: [],
+        registrationCounts: [],
       },
     }
   },
 
   mounted() {
-    this.fetchUserData();
-    this.fetchRegistrationData();
+    Promise.all([
+      this.fetchRegistrationData(),
+      this.fetchDailyPaymentAmount(),
+      this.fetchMonthlyPaymentAmount(),
+      this.fetchDailyActiveUsers(),
+      this.fetchMonthlyActiveUsers(),
+    ]).then(() => {
+      this.drawRegistrationChart();
+    }).catch(err => {
+      console.error('Error loading data:', err);
+    });
+
   },
 
   methods: {
+    fetchDailyPaymentAmount() {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayStartString = todayStart.toISOString().split('T')[0] + " 00:00:00";
+
+      const now = new Date();
+      const nowString = now.toISOString().replace('T', ' ').slice(0, 19); // 获取当前时间的字符串，格式为YYYY-MM-DD HH:MM:SS
+
+      db.collection('pay')
+        .where({
+          "data.createTime": {
+            $gte: todayStartString,
+            $lte: nowString,
+          },
+        })
+        .get()
+        .then(res => {
+          const totalAmountToday = res.data.reduce((sum, record) => sum + parseFloat(record.data.amountYuan), 0);
+          this.cards[2].number = totalAmountToday.toFixed(2); // 更新当日打款金额卡片
+        })
+        .catch(err => {
+          console.error('Error getting daily payment data:', err);
+        });
+    },
+
+    fetchMonthlyPaymentAmount() {
+      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      const startOfMonthString = startOfMonth.toISOString().split('T')[0] + " 00:00:00";
+
+      const now = new Date();
+      const nowString = now.toISOString().replace('T', ' ').slice(0, 19); // 获取当前时间的字符串，格式为YYYY-MM-DD HH:MM:SS
+
+      db.collection('pay')
+        .where({
+          "data.createTime": {
+            $gte: startOfMonthString,
+            $lte: nowString,
+          },
+        })
+        .get()
+        .then(res => {
+          const totalAmountMonth = res.data.reduce((sum, record) => sum + parseFloat(record.data.amountYuan), 0);
+          this.cards[3].number = totalAmountMonth.toFixed(2); // 更新当月打款金额卡片
+        })
+        .catch(err => {
+          console.error('Error getting monthly payment data:', err);
+        });
+    },
+
+    fetchDailyActiveUsers() {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      db.collection('login')
+        .get()
+        .then(res => {
+          const todayStartStr = `${todayStart.getFullYear()}年${todayStart.getMonth() + 1}月${todayStart.getDate()}日`;
+          const dailyActiveUsers = res.data.filter(item => item.data.loginTime.startsWith(todayStartStr));
+          this.cards[4].number = dailyActiveUsers.length; // 更新当日活跃人数卡片
+        })
+        .catch(err => {
+          console.error('Error getting daily active user data:', err);
+        });
+    },
+
+    fetchMonthlyActiveUsers() {
+      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+      db.collection('login')
+        .get()
+        .then(res => {
+          const monthStartStr = `${startOfMonth.getFullYear()}年${startOfMonth.getMonth() + 1}月`;
+          const monthlyActiveUsers = res.data.filter(item => item.data.loginTime.startsWith(monthStartStr));
+          this.cards[5].number = monthlyActiveUsers.length; // 更新当月活跃人数卡片
+        })
+        .catch(err => {
+          console.error('Error getting monthly active user data:', err);
+        });
+    },
+
+
     fetchUserData() {
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
@@ -71,46 +175,76 @@ export default {
         });
     },
 
-    fetchRegistrationData() {
-      // 获取近七天的日期和每天的注册数
-      for (let i = 6; i >= 0; i--) {
+    formatDateCNtoISO(dateStr) {
+      const parts = dateStr.match(/(\d+)年(\d+)月(\d+)日/);
+      if (!parts) return null; // 如果不匹配，返回null
+      // 注意：月份和日期需要补0
+      const isoString = `${parts[1]}-${parts[2].padStart(2, '0')}-${parts[3].padStart(2, '0')}`;
+      return isoString;
+    },
+
+    async fetchRegistrationData() {
+      // 初始化日期和计数
+      for (let i = 29; i >= 0; i--) {
         const date = new Date();
         date.setDate(date.getDate() - i);
         const dateString = date.toISOString().split('T')[0];
-
         this.chartData.dates.push(dateString);
-        this.chartData.counts.push(0); // 初始设置为0
+        this.chartData.registrationCounts.push(0);
+        this.chartData.activeUsers.push(0);
+        this.chartData.paymentAmounts.push(0);
       }
 
-      db.collection('user')
-        .get()
-        .then(res => {
-          res.data.forEach(user => {
-            console.log(user)
-            // 确保将createTime正确解析为日期对象并格式化为YYYY-MM-DD
-            const createTime = new Date(user.data.createTime).toISOString().split('T')[0];
-            const index = this.chartData.dates.indexOf(createTime);
-            if (index !== -1) {
-              this.chartData.counts[index]++;
-            }
-          });
-
-          this.drawRegistrationChart();
-        })
-        .catch(err => {
-          console.error('Error getting registration data:', err);
+      try {
+        // 获取注册用户数据
+        const userRes = await db.collection('user').get();
+        userRes.data.forEach(user => {
+          const createTime = new Date(user.data.createTime).toISOString().split('T')[0];
+          const index = this.chartData.dates.indexOf(createTime);
+          if (index !== -1) {
+            this.$set(this.chartData.registrationCounts, index, this.chartData.registrationCounts[index] + 1);
+          }
         });
+
+        // 获取活跃用户数据
+        const loginRes = await db.collection('login').get();
+        loginRes.data.forEach(login => {
+          // 对loginTime使用formatDateCNtoISO进行格式化
+          const loginTimeISO = this.formatDateCNtoISO(login.data.loginTime.split(' ')[0]); // 只取日期部分，忽略时间
+          const index = this.chartData.dates.indexOf(loginTimeISO);
+          if (index !== -1) {
+            this.$set(this.chartData.activeUsers, index, this.chartData.activeUsers[index] + 1);
+          }
+        });
+
+        // 获取打款金额数据
+        const paymentRes = await db.collection('pay').get();
+        paymentRes.data.forEach(payment => {
+          const paymentTime = new Date(payment.data.createTime).toISOString().split('T')[0];
+          console.log("paymentTime",paymentTime)
+          const index = this.chartData.dates.indexOf(paymentTime);
+          if (index !== -1) {
+            this.$set(this.chartData.paymentAmounts, index, this.chartData.paymentAmounts[index] + parseFloat(payment.data.amountYuan));
+          }
+        });
+
+        // 数据处理完毕后调用绘图
+      } catch (err) {
+        console.error('Error getting data:', err);
+      } finally {
+        this.drawRegistrationChart();
+      }
     },
 
     drawRegistrationChart() {
       const chartDom = this.$refs.registrationChart;
       const myChart = echarts.init(chartDom);
       const option = {
-        // title: {
-        //   text: '近七天注册人数变化'
-        // },
         tooltip: {
           trigger: 'axis'
+        },
+        legend: {
+          data: ['活跃人数', '打款金额', '注册人数']
         },
         xAxis: {
           type: 'category',
@@ -120,14 +254,33 @@ export default {
         yAxis: {
           type: 'value'
         },
-        series: [{
-          data: this.chartData.counts,
-          type: 'line',
-          areaStyle: {}
-        }]
+        series: [
+          {
+            name: '活跃人数',
+            data: this.chartData.activeUsers,
+            type: 'line',
+            smooth: true,
+            color: '#ff4500', // 例子颜色
+          },
+          {
+            name: '打款金额',
+            data: this.chartData.paymentAmounts,
+            type: 'line',
+            smooth: true,
+            color: '#1e90ff', // 例子颜色
+          },
+          {
+            name: '注册人数',
+            data: this.chartData.registrationCounts,
+            type: 'line',
+            smooth: true,
+            color: '#32cd32', // 例子颜色
+          }
+        ]
       };
       myChart.setOption(option);
     },
+
   },
 }
 </script>
@@ -147,16 +300,8 @@ export default {
   text-align: center;
 }
 
-.card-content {
-  /* 内容样式 */
-}
-
 .card-number {
   font-size: 2em;
   /* 数字样式 */
-}
-
-.card-label {
-  /* 标签样式 */
 }
 </style>
