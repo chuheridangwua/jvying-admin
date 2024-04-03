@@ -54,6 +54,7 @@ export default {
 
   mounted() {
     Promise.all([
+      this.fetchUserData(),
       this.fetchRegistrationData(),
       this.fetchDailyPaymentAmount(),
       this.fetchMonthlyPaymentAmount(),
@@ -148,7 +149,6 @@ export default {
         });
     },
 
-
     fetchUserData() {
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
@@ -159,6 +159,7 @@ export default {
       db.collection('user')
         .get()
         .then(res => {
+          console.log("注册总人数res",res)
           // 更新注册总人数
           this.cards[0].number = res.data.length;
 
