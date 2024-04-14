@@ -91,19 +91,19 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/example/tree',
     name: 'Example',
-    meta: { title: '项目信息', icon: 'el-icon-s-help' },
+    meta: { title: '活动信息', icon: 'el-icon-s-help' },
     children: [
       {
         path: 'tree',
         name: 'Tree',
         component: () => import('@/views/tree/index'),
-        meta: { title: '项目列表', icon: 'tree' }
+        meta: { title: '活动列表', icon: 'tree' }
       },
       {
         path: 'table',
         name: 'Table',
         component: () => import('@/views/table/index'),
-        meta: { title: '发起项目', icon: 'table' }
+        meta: { title: '发起活动', icon: 'table' }
       },
     ]
   },
@@ -121,70 +121,70 @@ export const constantRoutes = [
     ]
   },
 
-  {
-    path: '/invite',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'Invite',
-        component: () => import('@/views/invite/index'),
-        meta: { title: '邀请信息', icon: 'person' }
-      }
-    ]
-  },
+  // {
+  //   path: '/invite',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'Invite',
+  //       component: () => import('@/views/invite/index'),
+  //       meta: { title: '邀请信息', icon: 'person' }
+  //     }
+  //   ]
+  // },
 
-  {
-    path: '/income',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'Income',
-        component: () => import('@/views/income/index'),
-        meta: { title: '提现申请', icon: 'person' }
-      }
-    ]
-  },
+  // {
+  //   path: '/income',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'Income',
+  //       component: () => import('@/views/income/index'),
+  //       meta: { title: '提现申请', icon: 'person' }
+  //     }
+  //   ]
+  // },
 
-  {
-    path: '/pay',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'Pay',
-        component: () => import('@/views/pay/index'),
-        meta: { title: '结算单', icon: 'person' }
-      }
-    ]
-  },
+  // {
+  //   path: '/pay',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'Pay',
+  //       component: () => import('@/views/pay/index'),
+  //       meta: { title: '结算单', icon: 'person' }
+  //     }
+  //   ]
+  // },
 
-  {
-    path: '/duizhang',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'Duizhang',
-        component: () => import('@/views/duizhang/index'),
-        meta: { title: '对账', icon: 'person' }
-      }
-    ]
-  },
+  // {
+  //   path: '/duizhang',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'Duizhang',
+  //       component: () => import('@/views/duizhang/index'),
+  //       meta: { title: '对账', icon: 'person' }
+  //     }
+  //   ]
+  // },
 
-  {
-    path: '/integral',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'Integral',
-        component: () => import('@/views/integral/index'),
-        meta: { title: '兑换信息', icon: 'person' }
-      }
-    ]
-  },
+  // {
+  //   path: '/integral',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'Integral',
+  //       component: () => import('@/views/integral/index'),
+  //       meta: { title: '兑换信息', icon: 'person' }
+  //     }
+  //   ]
+  // },
 
   // {
   //   path: '/authority',

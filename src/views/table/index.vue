@@ -1,11 +1,12 @@
 <template>
-  <el-form :model="projectForm" :rules="rules" ref="projectForm" label-width="80px" style="margin: 30px;">
-    <el-form-item label="项目标题" prop="title">
+  <el-form :model="projectForm" :rules="rules" ref="projectForm" label-width="120px" style="margin: 30px;">
+    <el-form-item label="活动标题" prop="title">
       <el-input v-model="projectForm.title"></el-input>
     </el-form-item>
-    <el-form-item label="项目图片">
-      <el-upload action="#" list-type="picture-card" :auto-upload="false" :file-list="fileList" :on-change="handleChange"
-        :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :before-upload="() => false">
+    <el-form-item label="活动图片">
+      <el-upload action="#" list-type="picture-card" :auto-upload="false" :file-list="fileList"
+        :on-change="handleChange" :on-preview="handlePictureCardPreview" :on-remove="handleRemove"
+        :before-upload="() => false">
         <i slot="default" class="el-icon-plus"></i>
         <div slot="file" slot-scope="{file}">
           <img class="el-upload-list__item-thumbnail" :src="file.url" alt="">
@@ -23,7 +24,7 @@
     <el-dialog :visible.sync="dialogVisible">
       <img width="100%" :src="dialogImageUrl" alt="">
     </el-dialog>
-    <el-form-item label="项目详情" prop="detail">
+    <el-form-item label="活动详情" prop="detail">
       <MarkdownPro v-model="projectForm.detail" />
     </el-form-item>
     <el-form-item label="开始时间" prop="startTime">
@@ -32,15 +33,21 @@
     <el-form-item label="结束时间" prop="endTime">
       <el-date-picker v-model="projectForm.endTime" type="datetime" placeholder="选择日期时间"></el-date-picker>
     </el-form-item>
-    <el-form-item label="项目价格" prop="price">
+    <el-form-item label="奖励/消耗积分" prop="price">
       <el-input v-model="projectForm.price" type="number"></el-input>
     </el-form-item>
-    <el-form-item label="需求人数" prop="peopleNeeded">
+    <el-form-item label="人数" prop="peopleNeeded">
       <el-input v-model="projectForm.peopleNeeded" type="number"></el-input>
+    </el-form-item>
+    <el-form-item label="活动分类1" prop="classification1">
+      <el-input v-model="projectForm.classification1"></el-input>
+    </el-form-item>
+    <el-form-item label="活动分类2" prop="classification2">
+      <el-input v-model="projectForm.classification2"></el-input>
     </el-form-item>
     <el-form-item>
       <el-button type="primary" :loading="submitting" @click="confirmSubmit">
-        {{ projectId ? '确认更新' : '创建项目' }}
+        {{ projectId ? '确认更新' : '创建活动' }}
       </el-button>
     </el-form-item>
   </el-form>
@@ -58,14 +65,14 @@ export default {
   data() {
     const validateTitle = (rule, value, callback) => {
       if (!value) {
-        callback(new Error('请输入项目标题'))
+        callback(new Error('请输入活动标题'))
       } else {
         callback()
       }
     }
     const validateDetail = (rule, value, callback) => {
       if (!value) {
-        callback(new Error('请输入项目详情'));
+        callback(new Error('请输入活动详情'));
       } else {
         callback();
       }
@@ -86,9 +93,9 @@ export default {
     };
     const validatePrice = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请输入项目价格'));
+        callback(new Error('请输入活动价格'));
       } else if (isNaN(value)) {
-        callback(new Error('项目价格必须为数字值'));
+        callback(new Error('活动价格必须为数字值'));
       } else {
         callback();
       }
@@ -102,6 +109,20 @@ export default {
         callback();
       }
     };
+    const validateClassification1 = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入分类1'));
+      } else {
+        callback();
+      }
+    };
+    const validateClassification2 = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入分类2'));
+      } else {
+        callback();
+      }
+    };
     return {
       projectId: '',
       projectForm: {
@@ -110,7 +131,9 @@ export default {
         startTime: '',
         endTime: '',
         price: '',
-        peopleNeeded: ''
+        peopleNeeded: '',
+        classification1: '',
+        classification2: ''
       },
       submitting: false, // 追踪提交状态
       rules: {
@@ -120,6 +143,8 @@ export default {
         endTime: [{ required: true, trigger: 'change', validator: validateEndTime }],
         price: [{ required: true, trigger: 'blur', validator: validatePrice }],
         peopleNeeded: [{ required: true, trigger: 'blur', validator: validatePeopleNeeded }],
+        classification1: [{ required: true, trigger: 'blur', validator: validateClassification1 }],
+        classification2: [{ required: true, trigger: 'blur', validator: validateClassification2 }],
       },
       fileList: [],
       dialogImageUrl: '',
@@ -136,11 +161,11 @@ export default {
   methods: {
     async fetchProjectData(projectId) {
       try {
-        // 获取项目详情
-        const res = await db.collection("task").doc(projectId).get();
+        // 获取活动详情
+        const res = await db.collection("activity-chengjun").doc(projectId).get();
         console.log('获取成功', res);
         if (res.data.length > 0) {
-          // 更新项目详情到状态中
+          // 更新活动详情到状态中
           this.projectForm = {
             title: res.data[0].data.title,
             detail: res.data[0].data.detail,
@@ -148,13 +173,16 @@ export default {
             endTime: res.data[0].data.endTime,
             price: res.data[0].data.price,
             peopleNeeded: res.data[0].data.peopleNeeded,
+            classification1: res.data[0].data.classification1,
+            classification2: res.data[0].data.classification2,
           };
 
-          // 如果项目中包含图片，获取图片的临时链接
+          // 如果活动中包含图片，获取图片的临时链接
           if (res.data[0].data.images && res.data[0].data.images.length > 0) {
             const downloadRes = await app.getTempFileURL({
-              fileList: res.data[0].data.images,
+              fileList: res.data[0].data.images.map(image => ({ fileID: image, maxAge: 60 * 60 }))
             });
+
             // 更新图片临时链接到状态中
             this.fileList = downloadRes.fileList.map(file => ({
               name: file.fileID, // 根据实际情况调整
@@ -162,11 +190,11 @@ export default {
             }));
           }
         } else {
-          this.$message.error('未找到指定的项目数据');
+          this.$message.error('未找到指定的活动数据');
         }
       } catch (err) {
-        console.error("获取项目数据失败：", err);
-        this.$message.error('获取项目数据失败');
+        console.error("获取活动数据失败：", err);
+        this.$message.error('获取活动数据失败');
       }
     },
     handleRemove(file) {
@@ -216,7 +244,7 @@ export default {
               images: imageFileIDs, // 假设数据库中存储图片ID的字段为images
             };
             // 上传其他表单数据
-            const res = await db.collection("task").add({
+            const res = await db.collection("activity-chengjun").add({
               data: taskData
             });
             console.log("表单数据上传成功，记录ID：", res);
@@ -295,9 +323,9 @@ export default {
                 ...this.projectForm,
                 images: imageFileIDs,
               };
-              await db.collection("task").add({ data: taskData });
+              await db.collection("activity-chengjun").add({ data: taskData });
               console.log("表单数据上传成功");
-              this.$message.success('项目创建成功');
+              this.$message.success('活动创建成功');
               // 清空表单
               this.projectForm = {
                 title: '',
@@ -305,14 +333,16 @@ export default {
                 startTime: '',
                 endTime: '',
                 price: '',
-                peopleNeeded: ''
+                peopleNeeded: '',
+                classification1: '',
+                classification2: ''
               };
               this.fileList = []; // 清空文件列表
               // 跳转到指定页面
               this.$router.push('/example/tree');
             } catch (error) {
               console.error("上传数据失败", error);
-              this.$message.error('项目创建失败');
+              this.$message.error('活动创建失败');
             } finally {
               this.submitting = false; // 结束提交，隐藏加载状态
             }
@@ -324,9 +354,9 @@ export default {
                 ...this.projectForm,
                 images: imageFileIDs,
               };
-              await db.collection("task").doc(this.projectId).update({ data: taskData });
+              await db.collection("activity-chengjun").doc(this.projectId).update({ data: taskData });
               console.log("表单数据更新成功");
-              this.$message.success('项目更新成功');
+              this.$message.success('活动更新成功');
               // 清空表单
               this.projectForm = {
                 title: '',
@@ -334,14 +364,16 @@ export default {
                 startTime: '',
                 endTime: '',
                 price: '',
-                peopleNeeded: ''
+                peopleNeeded: '',
+                classification1: '',
+                classification2: ''
               };
               this.fileList = []; // 清空文件列表
               // 跳转到指定页面
               this.$router.push('/example/tree');
             } catch (error) {
               console.error("更新数据失败", error);
-              this.$message.error('项目更新失败');
+              this.$message.error('活动更新失败');
             } finally {
               this.submitting = false; // 结束提交，隐藏加载状态
             }
@@ -353,7 +385,7 @@ export default {
       });
     },
     confirmSubmit() {
-      this.$confirm(`确定要${this.projectId ? '更新' : '创建'}此项目吗？`, '确认操作', {
+      this.$confirm(`确定要${this.projectId ? '更新' : '创建'}此活动吗？`, '确认操作', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

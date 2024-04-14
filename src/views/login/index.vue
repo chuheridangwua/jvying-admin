@@ -5,7 +5,7 @@
       <!-- 登录表单 -->
       <div class="title-container">
         <!-- 登录标题 -->
-        <h1 class="title">聚英众包后台管理系统</h1>
+        <h1 class="title">城珺社区后台管理系统</h1>
       </div>
       <el-form-item prop="username">
         <!-- 用户名输入框 -->
@@ -98,7 +98,7 @@ export default {
           // this.$store.dispatch('user/login', this.loginForm).then(() => {
           console.log(this.loginForm)
 
-          db.collection("administrator")
+          db.collection("administrator-chengjun")
             .aggregate()
             // 匹配符合条件的文档
             .match({

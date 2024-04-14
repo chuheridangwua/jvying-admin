@@ -59,7 +59,7 @@ export default {
     methods: {
         // 获取消息列表
         fetchMessages() {
-            db.collection('message').orderBy('data.createdAt', 'desc').get().then(res => {
+            db.collection('message-chengjun').orderBy('data.createdAt', 'desc').get().then(res => {
                 this.messages = res.data.map(doc => ({
                     id: doc._id,
                     ...doc.data
@@ -71,7 +71,7 @@ export default {
             const now = new Date();
             const createdAt = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-            db.collection('message').add({
+            db.collection('message-chengjun').add({
                 data: {
                     title: this.editForm.title,
                     content: this.editForm.content,
@@ -91,7 +91,7 @@ export default {
             const now = new Date();
             const createdAt = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-            db.collection('message').doc(this.editForm.id).update({
+            db.collection('message-chengjun').doc(this.editForm.id).update({
                 data: {
                     title: this.editForm.title,
                     content: this.editForm.content,
@@ -106,7 +106,7 @@ export default {
         },
         // 删除消息
         deleteMessage(id) {
-            db.collection('message').doc(id).remove().then(() => {
+            db.collection('message-chengjun').doc(id).remove().then(() => {
                 this.fetchMessages(); // 重新加载消息列表
             }).catch(err => {
                 console.error("删除消息失败", err);

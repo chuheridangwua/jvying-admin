@@ -2,22 +2,22 @@
     <div v-loading="loading">
         <!-- 搜索框 -->
         <div style="margin:20px;width: 40%;display: flex;">
-            <div style="width: 150px;margin-top: 10px;margin-left: 20px;">项目标题:</div>
-            <el-input v-model="searchQuery" placeholder="请输入项目标题" class="search-box" @input="filterProjects"></el-input>
+            <div style="width: 150px;margin-top: 10px;margin-left: 20px;">活动标题:</div>
+            <el-input v-model="searchQuery" placeholder="请输入活动标题" class="search-box" @input="filterProjects"></el-input>
         </div>
-        <!-- 项目信息表格 -->
+        <!-- 活动信息表格 -->
         <el-table :data="filteredProjects" style="width: 95%;margin:0 20px;" row-height="80" border>
             <el-table-column type="index" label="#" width="50"></el-table-column>
-            <el-table-column prop="data.title" label="项目标题" width="180"></el-table-column>
-            <el-table-column label="项目图片" width="180">
+            <el-table-column prop="data.title" label="活动标题" width="180"></el-table-column>
+            <el-table-column label="活动图片" width="180">
                 <template slot-scope="scope">
                     <div class="image-container">
                         <img v-if="scope.row.data.imagesUrls && scope.row.data.imagesUrls.length > 0"
-                            :src="scope.row.data.imagesUrls[0]" alt="项目图片">
+                            :src="scope.row.data.imagesUrls[0]" alt="活动图片">
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column label="项目详情">
+            <el-table-column label="活动详情" width="200">
                 <template slot-scope="scope">
                     {{ scope.row.data.detail.substring(0, 50) + (scope.row.data.detail.length > 50 ? '...' : '') }}
                 </template>
@@ -28,8 +28,10 @@
             <el-table-column label="结束时间" width="180">
                 <template slot-scope="scope">{{ formatDate(new Date(scope.row.data.endTime)) }}</template>
             </el-table-column>
-            <el-table-column prop="data.price" label="任务价格" width="100"></el-table-column>
-            <el-table-column prop="data.peopleNeeded" label="需求人数" width="100"></el-table-column>
+            <el-table-column prop="data.price" label="奖励/消耗积分" width="120"></el-table-column>
+            <el-table-column prop="data.peopleNeeded" label="人数" width="100"></el-table-column>
+            <el-table-column prop="data.classification1" label="活动分类1" width="100"></el-table-column>
+            <el-table-column prop="data.classification2" label="活动分类2" width="100"></el-table-column>
             <el-table-column label="操作" width="180">
                 <template slot-scope="scope">
                     <el-button size="mini" @click="editProject(scope.row)">编辑</el-button>
@@ -60,7 +62,7 @@ export default {
     methods: {
         async fetchProjects() {
             try {
-                const res = await db.collection("task").get();
+                const res = await db.collection("activity-chengjun").get();
                 console.log("查询成功：", res);
                 const fileIDs = res.data.reduce((acc, project) => {
                     if (project.data.images) {
@@ -76,7 +78,7 @@ export default {
                     acc[file.fileID] = file.tempFileURL;
                     return acc;
                 }, {});
-                // 将获取到的临时URL添加到项目数据中
+                // 将获取到的临时URL添加到活动数据中
                 const projectsWithImages = res.data.map(project => {
                     const imagesUrls = (project.data.images || []).map(fileID => urlMap[fileID] || '');
                     return { ...project, data: { ...project.data, imagesUrls } };
@@ -127,13 +129,13 @@ export default {
         },
         async deleteProject(id, index) {
             try {
-                await db.collection("task")
+                await db.collection("activity-chengjun")
                     .doc(id)
                     .remove()
                     .then((res) => {
                         console.log('删除成功', res);
                         this.$message.success('删除成功');
-                        this.filteredProjects.splice(index, 1); // 从列表中移除已删除的项目
+                        this.filteredProjects.splice(index, 1); // 从列表中移除已删除的活动
                     })
                     .catch(() => {
                         this.$message({
@@ -142,7 +144,7 @@ export default {
                         });
                     });
             } catch (error) {
-                console.error("删除项目出错:", error);
+                console.error("删除活动出错:", error);
                 this.$message.error('删除失败');
             }
         }

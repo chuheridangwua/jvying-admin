@@ -30,7 +30,7 @@ export default {
     methods: {
         async fetchExistingImages() {
             try {
-                const res = await db.collection('carouselChart').get();
+                const res = await db.collection('carouselChart-chengjun').get();
                 console.log(res);
                 console.log(res.data[0].data.images);
                 if (res.data.length > 0 && res.data[0].data.images && res.data[0].data.images.length > 0) {
@@ -80,10 +80,10 @@ export default {
             try {
                 const uploadedFileIDs = this.fileList.map(file => file.name); // 假设 file.name 存储的是图片在云存储中的 ID
                 // 检查数据库中是否已有轮播图记录
-                const res = await db.collection('carouselChart').get();
+                const res = await db.collection('carouselChart-chengjun').get();
                 if (res.data.length > 0) {
                     // 如果已有记录，更新该记录
-                    await db.collection('carouselChart').doc(res.data[0]._id).update({
+                    await db.collection('carouselChart-chengjun').doc(res.data[0]._id).update({
                         data: {
                             images: uploadedFileIDs,
                         }
@@ -138,14 +138,14 @@ export default {
                 console.log("新图片上传完成, 返回的 FileIDs：", uploadedFileIDs);
 
                 // 检查数据库中是否已有轮播图记录
-                const res = await db.collection('carouselChart').get();
+                const res = await db.collection('carouselChart-chengjun').get();
                 if (res.data.length > 0) {
                     // 如果已有记录，更新该记录
                     const existingImages = res.data[0].data.images || [];
                     const newImageIds = uploadedFileIDs; // 假设这里只有新图片的ID
                     const updatedImages = existingImages.concat(newImageIds);
 
-                    await db.collection('carouselChart').doc(res.data[0]._id).update({
+                    await db.collection('carouselChart-chengjun').doc(res.data[0]._id).update({
                         data: {
                             images: updatedImages,
                         }
@@ -153,7 +153,7 @@ export default {
                     console.log("数据库记录更新成功");
                 } else {
                     // 如果没有记录，创建新记录
-                    await db.collection('carouselChart').add({
+                    await db.collection('carouselChart-chengjun').add({
                         data: {
                             images: uploadedFileIDs,
                         }

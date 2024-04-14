@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: '聚英众包后台管理系统',
+  title: '城珺社区后台管理系统',
 
   /**
    * @type {boolean} true | false

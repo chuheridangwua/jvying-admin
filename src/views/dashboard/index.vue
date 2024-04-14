@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- 数据卡片区域 -->
-    <div class="data-cards" style="margin: 20px;">
+    <h1 style="margin: 50px;">紧锣密鼓开发中，尽情期待......</h1>
+    <!-- <div class="data-cards" style="margin: 20px;">
       <div class="data-card" v-for="(card, index) in cards" :key="index">
         <div class="card-content">
           <div class="card-number">{{ card.number }}</div>
@@ -10,10 +10,9 @@
       </div>
     </div>
 
-    <!-- 折线图区域 -->
     <div>
       <div ref="registrationChart" style="width: 90vw;height:60vh;margin: 20px auto;"></div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -53,18 +52,18 @@ export default {
   },
 
   mounted() {
-    Promise.all([
-      this.fetchUserData(),
-      this.fetchRegistrationData(),
-      this.fetchDailyPaymentAmount(),
-      this.fetchMonthlyPaymentAmount(),
-      this.fetchDailyActiveUsers(),
-      this.fetchMonthlyActiveUsers(),
-    ]).then(() => {
-      this.drawRegistrationChart();
-    }).catch(err => {
-      console.error('Error loading data:', err);
-    });
+    // Promise.all([
+    //   this.fetchUserData(),
+    //   this.fetchRegistrationData(),
+    //   this.fetchDailyPaymentAmount(),
+    //   this.fetchMonthlyPaymentAmount(),
+    //   this.fetchDailyActiveUsers(),
+    //   this.fetchMonthlyActiveUsers(),
+    // ]).then(() => {
+    //   this.drawRegistrationChart();
+    // }).catch(err => {
+    //   console.error('Error loading data:', err);
+    // });
 
   },
 
