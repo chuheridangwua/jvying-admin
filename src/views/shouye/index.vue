@@ -1,5 +1,10 @@
 <template>
     <div class="upload-carousel">
+        <div class="total-amount-display">
+            累计发放金额：<el-input v-model="totalAmount" :disabled="!editMode"></el-input>
+            <el-button @click="toggleEditMode">{{ editMode ? '保存' : '编辑' }}</el-button>
+        </div>
+
         <h1 style="margin-bottom: 20px;">首页轮播图</h1>
         <el-upload class="upload-demo" action="#" list-type="picture-card" :file-list="fileList"
             :on-preview="handlePreview" :on-remove="handleRemove" :before-upload="beforeUpload" multiple>
@@ -22,12 +27,55 @@ export default {
             fileList: [],
             previewVisible: false,
             previewImage: '',
+            totalAmount: '0', // Initialize as a string
+            editMode: false, // To toggle input field
         };
     },
     created() {
         this.fetchExistingImages();
+        this.fetchTotalAmount(); // New method call
     },
     methods: {
+        async fetchTotalAmount() {
+            try {
+                const res = await db.collection('totalAmount').get();
+                if (res.data.length > 0) {
+                    this.totalAmount = res.data[0].amount.toString(); // 假设字段名为 'amount'
+                } else {
+                    console.log('未找到总金额记录，默认为 0');
+                }
+            } catch (error) {
+                console.error('获取总金额失败:', error);
+                this.$message.error('获取总金额失败');
+            }
+        },
+        toggleEditMode() {
+            this.editMode = !this.editMode;
+            if (!this.editMode) {
+                this.updateTotalAmount();
+            }
+        },
+        async updateTotalAmount() {
+            try {
+                const res = await db.collection('totalAmount').get();
+                if (res.data.length > 0) {
+                    await db.collection('totalAmount').doc(res.data[0]._id).update({
+                        amount: parseFloat(this.totalAmount) // 确保金额为数字
+                    });
+                    console.log("总金额更新成功");
+                    this.$message.success('总金额更新成功');
+                } else {
+                    await db.collection('totalAmount').add({
+                        amount: parseFloat(this.totalAmount)
+                    });
+                    console.log("成功创建总金额记录");
+                    this.$message.success('成功创建总金额记录');
+                }
+            } catch (error) {
+                console.error('更新总金额失败:', error);
+                this.$message.error('更新总金额失败');
+            }
+        },
         async fetchExistingImages() {
             try {
                 const res = await db.collection('carouselChart').get();
@@ -224,5 +272,15 @@ export default {
     /* 保持图片的原始长宽比，且保证图片完整显示 */
     border: 0;
     /* 如果不需要边框可以加上这一行 */
+}
+
+.total-amount-display {
+    margin-bottom: 20px;
+}
+
+.el-input {
+    display: inline-block;
+    width: auto;
+    margin-right: 10px;
 }
 </style>
