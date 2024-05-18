@@ -6,6 +6,13 @@
             <el-table-column prop="title" label="标题"></el-table-column>
             <el-table-column prop="content" label="内容"></el-table-column>
             <el-table-column prop="createdAt" label="创建时间"></el-table-column>
+            <el-table-column label="弹窗公告">
+                <template #default="scope">
+                    <el-tag :type="scope.row.isPopup ? 'success' : 'info'">
+                        {{ scope.row.isPopup ? '是' : '否' }}
+                    </el-tag>
+                </template>
+            </el-table-column>
             <el-table-column label="操作">
                 <template #default="scope">
                     <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
@@ -23,6 +30,9 @@
                 <el-form-item label="内容">
                     <el-input v-model="editForm.content"></el-input>
                 </el-form-item>
+                <el-form-item label="弹窗公告">
+                    <el-switch v-model="editForm.isPopup"></el-switch>
+                </el-form-item>
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
@@ -31,8 +41,6 @@
                 </span>
             </template>
         </el-dialog>
-
-        <!-- 新建消息按钮 -->
     </div>
 </template>
 
@@ -48,7 +56,8 @@ export default {
             editForm: { // 编辑表单数据
                 id: '',
                 title: '',
-                content: ''
+                content: '',
+                isPopup: false // 是否为弹窗公告
             },
             isEdit: false // 是否为编辑状态
         };
@@ -75,6 +84,7 @@ export default {
                 data: {
                     title: this.editForm.title,
                     content: this.editForm.content,
+                    isPopup: this.editForm.isPopup,
                     createdAt: createdAt
                 }
             }).then(() => {
@@ -95,33 +105,38 @@ export default {
                 data: {
                     title: this.editForm.title,
                     content: this.editForm.content,
+                    isPopup: this.editForm.isPopup,
                     createdAt: createdAt
                 }
             }).then(() => {
                 this.dialogVisible = false; // 关闭对话框
                 this.fetchMessages(); // 重新加载消息列表
+                this.$message.success('消息更新成功');
             }).catch(err => {
                 console.error("更新消息失败", err);
+                this.$message.error('消息更新失败');
             });
         },
         // 删除消息
         deleteMessage(id) {
             db.collection('message').doc(id).remove().then(() => {
                 this.fetchMessages(); // 重新加载消息列表
+                this.$message.success('消息删除成功');
             }).catch(err => {
                 console.error("删除消息失败", err);
+                this.$message.error('消息删除失败');
             });
         },
         // 处理新建消息
         handleNew() {
             this.isEdit = false;
-            this.editForm = { id: '', title: '', content: '' }; // 重置表单
+            this.editForm = { id: '', title: '', content: '', isPopup: false }; // 重置表单
             this.dialogVisible = true; // 显示对话框
         },
         // 处理编辑消息
         handleEdit(row) {
             this.isEdit = true;
-            this.editForm = { id: row.id, title: row.title, content: row.content }; // 填充表单数据
+            this.editForm = { id: row.id, title: row.title, content: row.content, isPopup: row.isPopup }; // 填充表单数据
             this.dialogVisible = true;
         },
         // 保存消息
@@ -141,7 +156,6 @@ export default {
     }
 };
 </script>
-
 
 <style scoped>
 .dialog-footer {
